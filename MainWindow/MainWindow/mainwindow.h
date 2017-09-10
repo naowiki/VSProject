@@ -20,6 +20,8 @@ class QAction;
 #include <QToolBar>
 #include <QStatusBar>
 #include <QLabel>
+#include <QMessageBox>
+#include <QFileDialog>
 //#include <FindDialog>
 #include "finddialog.h"
 #include "sortdialog.h"
@@ -29,70 +31,70 @@ class Spreadsheet;
 
 class MainWindow : public QMainWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	MainWindow();
+    MainWindow();
 
 protected:
-	void closeEvent( QCloseEvent *event );
+    void closeEvent( QCloseEvent *event );
 
 private slots:
-	void newFile();
-	void open();
-	bool save();
-	bool saveAs();
-	bool maybeSave();
-	void find();
-	void goToCell();
-	void sort();
-	void about();
-	void updateCellIndicators();
-	void updateStatusBar();
-	void spreadsheetModified();
+    void newFile();
+    void open();
+    bool save();
+    bool saveAs();
+    bool maybeSave();
+    void find();
+    void goToCell();
+    void sort();
+    void about();
+    void updateCellIndicators();
+    void updateStatusBar();
+    void spreadsheetModified();
     void openRecentFile();
 
 private:
-	void createActions();
-	void createMenus();
-	void createContextMenu();
-	void createToolBars();
-	void createStatusBar();
-	void readSettings();
-	void writeSettings();
-	bool okToContinue();
-	void loadFile( const QString &filename );
-	void saveFile( const QString &filename );
-	void setCurrentFile( const QString &filename );
-	void updateRecentFileActions();
-	QString strippedName( const QString &fullFileName );
+    void createActions();
+    void createMenus();
+    void createContextMenu();
+    void createToolBars();
+    void createStatusBar();
+    void readSettings();
+    void writeSettings();
+    bool okToContinue();
+    bool loadFile( const QString &filename );
+    bool saveFile( const QString &filename );
+    void setCurrentFile( const QString &filename );
+    void updateRecentFileActions();
+    QString strippedName( const QString &fullFileName );
 
-	Spreadsheet *spreadsheet;
-	FindDialog  *findDialog;
+    Spreadsheet *spreadsheet;
+    FindDialog  *findDialog;
     SortDialog  *sortDialog;
-	QLabel      *locationLabel;
-	QLabel      *formulaLabel;
-	QStringList recentFiles;
-	QString     curFile;
+    QLabel      *locationLabel;
+    QLabel      *formulaLabel;
+    QStringList recentFiles;
+    QString     curFile;
 
-	enum { MaxRecentFiles = 5 };
-	QAction     *recentFileActions[ MaxRecentFiles ];
-	QAction     *separatorAction;
+    enum { MaxRecentFiles = 5 };
+    QAction     *recentFileActions[ MaxRecentFiles ];
+    QAction     *separatorAction;
 
-	QMenu       *fileMenu;
-	QMenu       *editMenu;
-	QMenu       *toolsMenu;
-	QMenu       *optionsMenu;
-	QMenu       *helpMenu;
+    QMenu       *fileMenu;
+    QMenu       *editMenu;
+    QMenu       *toolsMenu;
+    QMenu       *optionsMenu;
+    QMenu       *helpMenu;
     QMenu       *selectSubMenu;
-	//・・・
-	QToolBar    *fileToolBar;
-	QToolBar    *editToolBar;
+    //・・・
+    QToolBar    *fileToolBar;
+    QToolBar    *editToolBar;
     /* アクションを生成 */
-	QAction     *newAction;                                      // Newアクション
-	QAction     *openAction;                                     // Openアクション
-	QAction     *saveAction;                                     // Saveアクション
-	QAction     *saveAsAction;                                   // SaveAsアクション
+    QAction     *newAction;                                      // Newアクション
+    QAction     *openAction;                                     // Openアクション
+    QAction     *saveAction;                                     // Saveアクション
+    QAction     *saveAsAction;                                   // SaveAsアクション
     QAction     *selectAllAction;                                // SelectAllアクション
     QAction     *showGridAction;                                 // ShowGridアクション
     QAction     *exitAction;                                     // Exitアクション
@@ -108,8 +110,8 @@ private:
     QAction     *sortAction;                                     // Sortアクション
     QAction     *autoRecalcAction;                               // AutoRecalcアクション
     QAction     *aboutAction;                                    // Aboutアクション
-	//・・・
-	QAction     *aboutQtAction;
+    //・・・
+    QAction     *aboutQtAction;
 };
 
 #endif

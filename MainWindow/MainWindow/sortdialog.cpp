@@ -19,18 +19,18 @@
 */
 //============================================================================================================
 SortDialog::SortDialog(QWidget *parent)
-	: QDialog(parent),
-	  bIsAdvanced(false)
+    : QDialog(parent),
+      bIsAdvanced(false)
 {
-	setupUi( this );
+    setupUi( this );
 
-	secondaryGroupBox->hide();
-	tertiaryGroupBox->hide();
-	layout()->setSizeConstraint( QLayout::SetFixedSize );
+    secondaryGroupBox->hide();
+    tertiaryGroupBox->hide();
+    layout()->setSizeConstraint( QLayout::SetFixedSize );
 
-	setColumnRange( 'A', 'X' );
+    setColumnRange( 'A', 'X' );
 
-	connect( moreButton, SIGNAL(clicked()),
+    connect( moreButton, SIGNAL(clicked()),
              this, SLOT(findMoreButtonClicked()) );
 }
 //============================================================================================================
@@ -45,24 +45,24 @@ SortDialog::SortDialog(QWidget *parent)
 //============================================================================================================
 void SortDialog::setColumnRange( QChar first, QChar last )
 {
-	primaryColumnCombo->clear();
-	secondaryColumnCombo->clear();
-	tertiaryColumnCombo->clear();
+    primaryColumnCombo->clear();
+    secondaryColumnCombo->clear();
+    tertiaryColumnCombo->clear();
 
-	secondaryColumnCombo->addItem( tr("None") );
-	tertiaryColumnCombo->addItem( tr("None") );
+    secondaryColumnCombo->addItem( tr("None") );
+    tertiaryColumnCombo->addItem( tr("None") );
 
-	primaryColumnCombo->setMinimumSize(
-		secondaryColumnCombo->sizeHint() );
+    primaryColumnCombo->setMinimumSize(
+        secondaryColumnCombo->sizeHint() );
 
-	QChar ch = first;
-	while ( ch <= last )
-	{
-		primaryColumnCombo->addItem( QString(ch) );
-		secondaryColumnCombo->addItem( QString(ch) );
-		tertiaryColumnCombo->addItem( QString(ch) );
-		ch = ch.unicode() + 1;
-	}
+    QChar ch = first;
+    while ( ch <= last )
+    {
+        primaryColumnCombo->addItem( QString(ch) );
+        secondaryColumnCombo->addItem( QString(ch) );
+        tertiaryColumnCombo->addItem( QString(ch) );
+        ch = ch.unicode() + 1;
+    }
 }
 //============================================================================================================
 /**
@@ -75,13 +75,13 @@ void SortDialog::setColumnRange( QChar first, QChar last )
 //============================================================================================================
 void SortDialog::findMoreButtonClicked()
 {
-	bIsAdvanced = !bIsAdvanced;
-	if ( !bIsAdvanced )
-	{
-		moreButton->setText("Normal Mode");
-	}
-	else
-	{
-		moreButton->setText("Advanced Mode");
-	}
+    bIsAdvanced = !bIsAdvanced;
+    if ( !bIsAdvanced )
+    {
+        moreButton->setText("Normal Mode");
+    }
+    else
+    {
+        moreButton->setText("Advanced Mode");
+    }
 }

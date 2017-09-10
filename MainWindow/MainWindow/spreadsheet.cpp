@@ -14,10 +14,10 @@
 */
 //==============================================================================================================================================================
 Spreadsheet::Spreadsheet(QWidget *parent)
-	: QDialog(parent),
+    : QDialog(parent),
       IsChecked(false)
 {
-	setupUi(this);
+    setupUi(this);
 }
 //==============================================================================================================================================================
 /**
@@ -52,4 +52,14 @@ QString Spreadsheet::currentFormula()
 void Spreadsheet::clear()
 {
 
+}
+
+bool Spreadsheet::readFile( QString fileName )
+{
+    return true;
+}
+
+bool Spreadsheet::writeFile(QString fileName)
+{
+    return true;
 }

@@ -28,12 +28,12 @@ MainWindow::MainWindow()
     spreadsheet = new Spreadsheet;
     setCentralWidget( spreadsheet );
 
-	// 検索ダイアログを表示
-	//findDialog = new FindDialog;
-	//setCentralWidget( findDialog );
-	// ソートダイアログを表示
-	//sortDialog = new SortDialog;
-	//setCentralWidget( sortDialog );
+    // 検索ダイアログを表示
+    //findDialog = new FindDialog;
+    //setCentralWidget( findDialog );
+    // ソートダイアログを表示
+    //sortDialog = new SortDialog;
+    //setCentralWidget( sortDialog );
 
     createActions();
     createMenus();
@@ -87,9 +87,9 @@ void MainWindow::createActions()
     saveAsAction->setIcon( QIcon(":/images/saveas.png") );                               // アイコン(save.Png)を設定
     saveAsAction->setShortcut( tr("Ctrl+A") );                                           // ショートカットキー(Ctrl+N)を設定
     saveAsAction->setStatusTip( tr("Save as a spreadsheet file.") );                     // ステータスバーメッセージを設定
-    connect( saveAsAction, SIGNAL( triggered() ), this, SLOT( saveas() ) );              // アクションのtriggered()シグナルをスロット関数saveasに接続
+    connect( saveAsAction, SIGNAL( triggered() ), this, SLOT( saveAs() ) );              // アクションのtriggered()シグナルをスロット関数saveasに接続
     /* 最近開いたファイル */
-	for ( int i = 0; i < MaxRecentFiles; ++i  )
+    for ( int i = 0; i < MaxRecentFiles; ++i  )
     {
         recentFileActions[ i ] = new QAction( this );
         recentFileActions[ i ]->setVisible( false );
@@ -97,7 +97,7 @@ void MainWindow::createActions()
                                  this, SLOT( openRecentFile() ) );
     }
     /* Select Allアクションを生成 */
-	selectAllAction = new QAction( tr("&All"), this );                                   // アクセラレータSelectAllを設定
+    selectAllAction = new QAction( tr("&All"), this );                                   // アクセラレータSelectAllを設定
     selectAllAction->setShortcut( tr("Ctrl+A") );                                        // ショートカットキー(Ctrl+A)を設定
     selectAllAction->setStatusTip( tr("Select all the cells in the spreadsheet") );      // ステータスバーメッセージを設定
     connect( selectAllAction, SIGNAL( triggered() ),
@@ -132,6 +132,10 @@ void MainWindow::createActions()
     selectColumnAction = new QAction( tr("Select &Column"), this );                      // アクセラレータSelectColumnを設定
     /* Findアクションを生成 */
     findAction = new QAction( tr("&Find"), this );                                       // アクセラレータfindActionを設定
+	findAction->setIcon(QIcon(":/images/find.png"));                                     // アイコン(New.Png)を設定
+	findAction->setShortcut(tr("Ctrl+F"));                                               // ショートカットキー(Ctrl+N)を設定
+	findAction->setStatusTip(tr("Find a spreadsheet file."));                            // ステータスバーメッセージを設定
+	connect( findAction, SIGNAL(triggered()), this, SLOT(find()));                    // アクションのtriggered()シグナルをスロット関数newFileに接続
     /* GoToCellアクションを生成 */
     goToCellAction = new QAction( tr("&GoTo Cell"), this );                              // アクセラレータgoToCellActionを設定
     /* Recalculateアクションを生成 */
@@ -166,7 +170,7 @@ void MainWindow::createMenus()
     fileMenu->addAction( showGridAction );
     fileMenu->addAction( aboutQtAction );
     separatorAction = fileMenu->addSeparator();
-	for (int i = 0; i < MaxRecentFiles; ++i)
+    for (int i = 0; i < MaxRecentFiles; ++i)
     {
         fileMenu->addAction( recentFileActions[i] );
     }
@@ -313,9 +317,9 @@ void MainWindow::writeSettings()
 //==============================================================================================================================================================
 /**
 * @fn
-* @brief  ｘｘｘｘｘｘｘｘ
+* @brief  修正を保存するかを決定
 * @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/10
 * @param  なし
 * @return なし
 * @detail ｘｘｘｘｘｘｘｘ
@@ -323,12 +327,46 @@ void MainWindow::writeSettings()
 //==============================================================================================================================================================
 bool MainWindow::okToContinue()
 {
-	if ( isWindowModified() )
-	{
-//        int ret = QMessageBox::warning( this, tr( "Spreadsheet" ),
-//                            )
-	}
+    if ( isWindowModified() )
+    {
+        int ret = QMessageBox::warning( this, tr( "Spreadsheet" ),
+                            tr( "The document has been modified.\n"
+                                "Do you want to save your changes?" ),
+                            QMessageBox::Yes | QMessageBox::Default,
+                            QMessageBox::No,
+                            QMessageBox::Cancel | QMessageBox::Escape );
+        if ( ret == QMessageBox::Yes )
+        {
+            return save();
+        }
+        else if ( ret == QMessageBox::Cancel )
+        {
+            return false;
+        }
+        return true;
+    }
+}
+//==============================================================================================================================================================
+/**
+* @fn
+* @brief  ファイル名をロード
+* @author fukuda.naotaka
+* @date   2017/09/10
+* @param  なし
+* @return なし
+* @detail ｘｘｘｘｘｘｘｘ
+*/
+//==============================================================================================================================================================
+bool MainWindow::loadFile( const QString &fileName )
+{
+    if ( !spreadsheet->readFile( fileName) )
+    {
+        statusBar()->showMessage( tr( "Loading canceled" ), 2000 );
+        return false;
+    }
 
+    setCurrentFile( fileName );
+    statusBar()->showMessage( tr( "File loaded" ), 2000 );
     return true;
 }
 //==============================================================================================================================================================
@@ -336,52 +374,56 @@ bool MainWindow::okToContinue()
 * @fn
 * @brief  ｘｘｘｘｘｘｘｘ
 * @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/10
 * @param  なし
 * @return なし
 * @detail ｘｘｘｘｘｘｘｘ
 */
 //==============================================================================================================================================================
-void MainWindow::loadFile(const QString &filename)
+bool MainWindow::saveFile(const QString &fileName)
 {
-
+    if ( !spreadsheet->writeFile( fileName ) )
+    {
+        statusBar()->showMessage( tr( "Saving canceled" ), 2000 );
+        return false;
+    }
+    setCurrentFile( fileName );
+    statusBar()->showMessage( tr( "File saved" ), 2000 );
+    return true;
 }
 //==============================================================================================================================================================
 /**
 * @fn
-* @brief  ｘｘｘｘｘｘｘｘ
+* @brief  編集中のファイルを設定
 * @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/10
 * @param  なし
 * @return なし
 * @detail ｘｘｘｘｘｘｘｘ
 */
 //==============================================================================================================================================================
-void MainWindow::saveFile(const QString &filename)
+void MainWindow::setCurrentFile( const QString &fileName )
 {
+    curFile = fileName;
+    setWindowModified( false );
 
+    QString shownName = "Untitled";
+    if ( !curFile.isEmpty() )
+    {
+        shownName = strippedName( curFile );
+        recentFiles.removeAll( curFile );
+        recentFiles.prepend( curFile );
+        updateRecentFileActions();
+    }
+    setWindowTitle(tr("%1[*] - %2").arg( shownName )
+                                   .arg( tr( "Spreadsheet" ) ) );
 }
 //==============================================================================================================================================================
 /**
 * @fn
-* @brief  ｘｘｘｘｘｘｘｘ
+* @brief  最近使用したファイル更新処理
 * @author fukuda.naotaka
-* @date   2017/07/24
-* @param  なし
-* @return なし
-* @detail ｘｘｘｘｘｘｘｘ
-*/
-//==============================================================================================================================================================
-void MainWindow::setCurrentFile(const QString &filename)
-{
-
-}
-//==============================================================================================================================================================
-/**
-* @fn
-* @brief  ｘｘｘｘｘｘｘｘ
-* @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/10
 * @param  なし
 * @return なし
 * @detail ｘｘｘｘｘｘｘｘ
@@ -389,7 +431,31 @@ void MainWindow::setCurrentFile(const QString &filename)
 //==============================================================================================================================================================
 void MainWindow::updateRecentFileActions()
 {
+    QMutableStringListIterator i( recentFiles );
+    while ( i.hasNext() ) {
+        if ( !QFile::exists( i.next() ) )
+        {
+            i.remove();
+        }
+    }
 
+    for (int j = 0; j < MaxRecentFiles; ++j)
+    {
+        if (j < recentFiles.count())
+        {
+            QString text = tr("&%1 %2")
+                .arg(j + 1)
+                .arg(strippedName(recentFiles[j]));
+            recentFileActions[j]->setText(text);
+            recentFileActions[j]->setData(recentFiles[j]);
+            recentFileActions[j]->setVisible(true);
+        }
+        else
+        {
+            recentFileActions[j]->setVisible(false);
+        }
+    }
+    separatorAction->setVisible( !recentFiles.isEmpty() );
 }
 //==============================================================================================================================================================
 /**
@@ -404,7 +470,7 @@ void MainWindow::updateRecentFileActions()
 //==============================================================================================================================================================
 QString MainWindow::strippedName(const QString &fullFileName)
 {
-    return "abc";
+    return QFileInfo( fullFileName ).fileName();
 }
 //==============================================================================================================================================================
 /**
@@ -419,18 +485,18 @@ QString MainWindow::strippedName(const QString &fullFileName)
 //==============================================================================================================================================================
 void MainWindow::newFile()
 {
-	if ( maybeSave() )
-	{
+    if ( maybeSave() )
+    {
         spreadsheet->clear();
         setCurrentFile("");
-	}
+    }
 }
 //==============================================================================================================================================================
 /**
 * @fn
-* @brief  ｘｘｘｘｘｘｘｘｘｘｘ
+* @brief  ファイルを開く
 * @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/10
 * @param  なし
 * @return なし
 * @detail 
@@ -438,14 +504,23 @@ void MainWindow::newFile()
 //==============================================================================================================================================================
 void MainWindow::open()
 {
-
+    if ( okToContinue() )
+    {
+        QString fileName = QFileDialog::getOpenFileName( this,
+            tr( "Open Spreadsheet" ), ".",
+            tr( "Spreadsheet files (*.sp)" ) );
+        if ( !fileName.isEmpty() )
+        {
+            loadFile( fileName );
+        }
+    }
 }
 //==============================================================================================================================================================
 /**
 * @fn
-* @brief  ｘｘｘｘｘｘｘｘｘｘ
+* @brief  保存処理
 * @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/10
 * @param  なし
 * @return bool 保存成否
 * @detail 
@@ -453,14 +528,21 @@ void MainWindow::open()
 //==============================================================================================================================================================
 bool MainWindow::save()
 {
-	return true;
+    if ( curFile.isEmpty() )
+    {
+        return saveAs();
+    }
+    else
+    {
+        return saveFile( curFile );
+    }
 }
 //==============================================================================================================================================================
 /**
 * @fn
-* @brief  ｘｘｘｘｘｘｘｘ
+* @brief  別名で保存処理
 * @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/10
 * @param  なし
 * @return bool 別名で保存成否
 * @detail 
@@ -468,14 +550,21 @@ bool MainWindow::save()
 //==============================================================================================================================================================
 bool MainWindow::saveAs()
 {
-	return true;
+    QString fileName = QFileDialog::getSaveFileName( this,
+                               tr( "Save Spreadsheet" ), ".",
+                               tr( "Spreadsheet files (*.sp)") );
+    if ( fileName.isEmpty() )
+    {
+        return false;
+    }
+    return saveFile( fileName );
 }
 //==============================================================================================================================================================
 /**
 * @fn
-* @brief  ｘｘｘｘｘｘｘｘ
+* @brief  検索処理
 * @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/10
 * @param  なし
 * @return なし
 * @detail ｘｘｘｘｘｘｘｘ
@@ -483,7 +572,16 @@ bool MainWindow::saveAs()
 //==============================================================================================================================================================
 void MainWindow::find()
 {
-
+	if( !findDialog )
+	{
+		findDialog = new FindDialog( this );
+		connect( findDialog,  SIGNAL( findNext( const QString &, Qt::CaseSensitivity ) ),
+			     spreadsheet, SLOT(   findNext( const QString &, Qt::CaseSensitivity ) ) );
+		connect( findDialog,  SIGNAL( findPrev( const QString &, Qt::CaseSensitivity ) ),
+			     spreadsheet, SLOT(   findPrev( const QString &, Qt::CaseSensitivity ) ) );
+	}
+	findDialog->show();
+	findDialog->activateWindow();
 }
 //==============================================================================================================================================================
 /**
@@ -570,9 +668,9 @@ void MainWindow::spreadsheetModified()
 //==============================================================================================================================================================
 /**
 * @fn
-* @brief  ｘｘｘｘｘｘｘｘ
+* @brief  最近使用したファイル開く処理
 * @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/10
 * @param  なし
 * @return なし
 * @detail ｘｘｘｘｘｘｘｘ
@@ -580,14 +678,21 @@ void MainWindow::spreadsheetModified()
 //==============================================================================================================================================================
 void MainWindow::openRecentFile()
 {
-
+    if ( okToContinue() )
+    {
+        QAction *action = qobject_cast<QAction *>( sender() );
+        if( action )
+        { 
+            loadFile( action->data().toString() );
+        }
+    }
 }
 //==============================================================================================================================================================
 /**
 * @fn
-* @brief  ｘｘｘｘｘｘｘｘ
+* @brief  閉じる処理
 * @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/10
 * @param  なし
 * @return なし
 * @detail ｘｘｘｘｘｘｘｘ
@@ -595,7 +700,15 @@ void MainWindow::openRecentFile()
 //==============================================================================================================================================================
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-
+    if ( okToContinue() )
+    {
+        writeSettings();
+        event->accept();
+    }
+    else
+    {
+        event->ignore();
+    }
 }
 //==============================================================================================================================================================
 /**
@@ -610,5 +723,5 @@ void MainWindow::closeEvent(QCloseEvent *event)
 //==============================================================================================================================================================
 bool MainWindow::maybeSave()
 {
-	return true;
+    return true;
 }

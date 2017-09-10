@@ -14,14 +14,16 @@
 
 class Spreadsheet : public QDialog, public Ui::Spreadsheet
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	Spreadsheet( QWidget *parent = 0 );
+    Spreadsheet( QWidget *parent = 0 );
     bool showGrid();
     void clear();
     QString currentLocation();
     QString currentFormula();
+    bool readFile( QString );
+    bool writeFile( QString );
 
 public slots:
     void newFile();

@@ -17,7 +17,7 @@ public:
     FindDialog( QWidget *parent = 0 );
 signals:
     void findNext( const QString &str, Qt::CaseSensitivity cs );
-    void findPrevious( const QString &str, Qt::CaseSensitivity cs );
+    void findPrev( const QString &str, Qt::CaseSensitivity cs );
 private slots:
     void findClicked();
     void enableFindButton( const QString &test );

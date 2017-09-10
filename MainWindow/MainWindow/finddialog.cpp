@@ -45,7 +45,17 @@ FindDialog::FindDialog( QWidget *parent )
     setWindowTitle( tr("Find") );
     setFixedHeight( sizeHint().height() );
 }
-
+//==============================================================================================================================================================
+/**
+* @fn
+* @brief  [Find]ボタン押下処理
+* @author fukuda.naotaka
+* @date   2017/07/24
+* @param  なし
+* @return なし
+* @detail ｘｘｘｘｘｘｘｘ
+*/
+//==============================================================================================================================================================
 void FindDialog::findClicked()
 {
     QString text = lineEdit->text();
@@ -53,14 +63,24 @@ void FindDialog::findClicked()
         caseCheckBox->isChecked() ? Qt::CaseSensitive
                                   : Qt::CaseInsensitive;
     if ( backwardCheckBox->isChecked() ) {
-        emit findPrevious( text, cs );
+        emit findPrev( text, cs );
     }
     else
     {
         emit findNext( text, cs );
     }
 }
-
+//==============================================================================================================================================================
+/**
+* @fn
+* @brief  [Find]ボタン有効化処理
+* @author fukuda.naotaka
+* @date   2017/07/24
+* @param  なし
+* @return なし
+* @detail ｘｘｘｘｘｘｘｘ
+*/
+//==============================================================================================================================================================
 void FindDialog::enableFindButton( const QString &text )
 {
     findButton->setEnabled( !text.isEmpty() );

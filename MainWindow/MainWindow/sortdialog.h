@@ -13,15 +13,15 @@
 
 class SortDialog : public QDialog, public Ui::SortDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 private:
     bool bIsAdvanced;
 
 public:
-	SortDialog( QWidget *parent = 0 );
+    SortDialog( QWidget *parent = 0 );
 
-	void setColumnRange( QChar first, QChar last );
+    void setColumnRange( QChar first, QChar last );
 
 private slots:
     void findMoreButtonClicked();
