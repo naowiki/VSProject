@@ -1,4 +1,5 @@
 #include <QtGui>
+#include <QList>
 
 #include "spreadsheet.h"
 
@@ -62,4 +63,23 @@ bool Spreadsheet::readFile( QString fileName )
 bool Spreadsheet::writeFile(QString fileName)
 {
     return true;
+}
+void Spreadsheet::setCurrentCell( int nRow, int nCol )
+{
+
+}
+
+QTableWidgetSelectionRange Spreadsheet::selectedRange() const
+{
+//    QList<QTableWidgetSelectionRange> ranges = selectedRange();
+//    if ( ranges.isEmpty() )
+//    {
+        return QTableWidgetSelectionRange();
+//    }
+//    return ranges.first();
+}
+
+void Spreadsheet::sort( const SpreadsheetCompare &compare )
+{
+
 }

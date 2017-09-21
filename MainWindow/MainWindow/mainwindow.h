@@ -25,6 +25,7 @@ class QAction;
 //#include <FindDialog>
 #include "finddialog.h"
 #include "sortdialog.h"
+#include "gotocelldialog.h"
 //#include "spreadsheet.h"
 class Spreadsheet;
 
@@ -69,13 +70,14 @@ private:
     void updateRecentFileActions();
     QString strippedName( const QString &fullFileName );
 
-    Spreadsheet *spreadsheet;
-    FindDialog  *findDialog;
-    SortDialog  *sortDialog;
-    QLabel      *locationLabel;
-    QLabel      *formulaLabel;
-    QStringList recentFiles;
-    QString     curFile;
+    Spreadsheet    *spreadsheet;
+    FindDialog     *findDialog;
+    GoToCellDialog *goToCellDialog;
+    SortDialog     *sortDialog;
+    QLabel         *locationLabel;
+    QLabel         *formulaLabel;
+    QStringList    recentFiles;
+    QString        curFile;
 
     enum { MaxRecentFiles = 5 };
     QAction     *recentFileActions[ MaxRecentFiles ];

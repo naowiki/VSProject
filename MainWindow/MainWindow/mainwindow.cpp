@@ -7,6 +7,7 @@
 */
 //==============================================================================================================================================================
 #include <QtGui>
+#include <QTableWidgetSelectionRange>
 #include "mainwindow.h"
 #include "finddialog.h"
 #include "sortdialog.h"
@@ -109,7 +110,7 @@ void MainWindow::createActions()
     showGridAction->setStatusTip( tr("Show or hide the spreadsheet's grid") );           // ステータスバーメッセージを設定
     connect( showGridAction, SIGNAL( toggled( bool ) ),                                  // アクションのtriggered()シグナルをスロット関数setShowGridに接続
                 spreadsheet, SLOT( setShowGrid( bool ) ) );
-    /* Aboutアクションを生成 */
+    /* AboutQtアクションを生成 */
     aboutQtAction = new QAction( tr("About &Qt"), this );                                // アクセラレータAboutを設定
     aboutQtAction->setStatusTip( tr("Show the Qt library's About box") );                // ステータスバーメッセージを設定
     connect( aboutQtAction, SIGNAL( triggered() ),                                       // アクションのtriggered()シグナルをスロット関数aboutQtに接続
@@ -138,14 +139,27 @@ void MainWindow::createActions()
 	connect( findAction, SIGNAL(triggered()), this, SLOT(find()));                    // アクションのtriggered()シグナルをスロット関数newFileに接続
     /* GoToCellアクションを生成 */
     goToCellAction = new QAction( tr("&GoTo Cell"), this );                              // アクセラレータgoToCellActionを設定
+    goToCellAction->setIcon( QIcon( ":/images/goto.png" ) );                                     // アイコン(New.Png)を設定
+    goToCellAction->setShortcut( tr( "Ctrl+G" ) );                                               // ショートカットキー(Ctrl+N)を設定
+    goToCellAction->setStatusTip( tr( "Go to the Cell." ) );                            // ステータスバーメッセージを設定
+    connect( goToCellAction, SIGNAL( triggered() ), this, SLOT( goToCell() ) );                    // アクションのtriggered()シグナルをスロット関数newFileに接続
     /* Recalculateアクションを生成 */
     recalculateAction = new QAction( tr("&Recalculate"), this );                         // アクセラレータRecalculateを設定
     /* Sortアクションを生成 */
     sortAction = new QAction( tr("&Sort"), this );                                       // アクセラレータSortを設定
+	sortAction->setIcon(QIcon(":/images/sort.png"));                                     // アイコン(New.Png)を設定
+	sortAction->setShortcut(tr("Ctrl+S"));                                               // ショートカットキー(Ctrl+N)を設定
+	sortAction->setStatusTip(tr("Sort Cells."));                            // ステータスバーメッセージを設定
+	connect(sortAction, SIGNAL(triggered()), this, SLOT(sort()));                    // アクションのtriggered()シグナルをスロット関数newFileに接続
     /* AutoRecalcアクションを生成 */
     autoRecalcAction = new QAction( tr("&AutoRecalc"), this );                           // アクセラレータAutoRecalcを設定
     /* Aboutアクションを生成 */
     aboutAction = new QAction( tr("&About"), this );                                     // アクセラレータAboutを設定
+	aboutAction->setIcon(QIcon(":/images/about.png"));                                     // アイコン(New.Png)を設定
+	aboutAction->setShortcut(tr("Ctrl+A"));                                               // ショートカットキー(Ctrl+N)を設定
+	aboutAction->setStatusTip(tr("About"));                            // ステータスバーメッセージを設定
+	connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));                    // アクションのtriggered()シグナルをスロット関数newFileに接続
+
 }
 //==============================================================================================================================================================
 /**
@@ -297,7 +311,22 @@ void MainWindow::createStatusBar()
 //==============================================================================================================================================================
 void MainWindow::readSettings()
 {
+    QSettings settings("Software Inc.", "Spreadshet");
 
+    QRect rect = settings.value( "geometry",
+                                 QRect( 200, 200, 640, 480 ) ).toRect();
+
+    move( rect.topLeft() );
+    resize( rect.size() );
+
+    recentFiles = settings.value( "recentFiles" ).toStringList();
+    updateRecentFileActions();
+
+    bool showGrid = settings.value( "showGrid", true ).toBool();
+    showGridAction->setChecked( showGrid );
+
+    bool autoRecalc = settings.value( "autoRecalc", true ).toBool();
+    autoRecalcAction->setChecked( autoRecalc );
 }
 //==============================================================================================================================================================
 /**
@@ -312,7 +341,16 @@ void MainWindow::readSettings()
 //==============================================================================================================================================================
 void MainWindow::writeSettings()
 {
+    QSettings settings("Software Inc.", "Spreadshet");
 
+    settings.setValue( "geometry", geometry() );
+    settings.setValue( "recentFiles", recentFiles );
+    settings.setValue( "showGrid", showGridAction->isChecked() );
+    settings.setValue( "autoRecalc", autoRecalcAction->isChecked() );
+    settings.beginGroup( "findDialog" );
+    settings.setValue( "matchCase", findDialog->caseCheckBox->isChecked() );
+    settings.setValue( "searchBackward", findDialog->backwardCheckBox->isChecked() );
+	settings.endGroup();
 }
 //==============================================================================================================================================================
 /**
@@ -596,14 +634,20 @@ void MainWindow::find()
 //==============================================================================================================================================================
 void MainWindow::goToCell()
 {
-
+    GoToCellDialog *dialog = new GoToCellDialog( this );
+    if ( dialog->exec() ) {
+        QString str = dialog->lineEdit->text().toUpper();
+        spreadsheet->setCurrentCell( str.mid( 1 ).toInt() - 1,
+                                     str[0].unicode() - 'A' );
+    }
+    delete dialog;
 }
 //==============================================================================================================================================================
 /**
 * @fn
-* @brief  ｘｘｘｘｘｘｘｘ
+* @brief  ソート処理
 * @author fukuda.naotaka
-* @date   2017/07/24
+* @date   2017/09/21
 * @param  なし
 * @return なし
 * @detail ｘｘｘｘｘｘｘｘ
@@ -611,7 +655,26 @@ void MainWindow::goToCell()
 //==============================================================================================================================================================
 void MainWindow::sort()
 {
-
+    SortDialog dialog(this);
+    QTableWidgetSelectionRange range = spreadsheet->selectedRange();
+    dialog.setColumnRange( 'A' + range.leftColumn(),
+                           'A' + range.rightColumn() );
+    if ( dialog.exec() ) {
+        SpreadsheetCompare compare;
+        compare.keys[ 0 ] =
+            dialog.primaryColumnCombo->currentIndex();
+        compare.keys[ 1 ] =
+            dialog.secondaryColumnCombo->currentIndex() - 1;
+        compare.keys[ 2 ] =
+            dialog.tertiaryColumnCombo->currentIndex() - 1;
+        compare.ascending[ 0 ] =
+            ( dialog.primaryOrderCombo->currentIndex() == 0 );
+        compare.ascending[ 1 ] =
+            ( dialog.secondaryOrderCombo->currentIndex() == 0 );
+        compare.ascending[ 2 ] =
+            ( dialog.tertiaryOrderCombo->currentIndex() == 0 );
+        spreadsheet->sort( compare );
+    }
 }
 //==============================================================================================================================================================
 /**
@@ -626,7 +689,13 @@ void MainWindow::sort()
 //==============================================================================================================================================================
 void MainWindow::about()
 {
-
+    QMessageBox::about(this, tr("About Spreadsheet"),
+        tr("<h2>Spreadsheet 1.0</h2>"
+           "<p>Copyright &copy; 2006 Software Inc."
+           "<p>Spreadsheet is a small application that "
+           "demonstrates <b>QAction</b>, <b>QMainWindow</b>, "
+           "<b>QMenuBar</b>, <b>QStatusbar</b>, "
+           "<b>>QToolBar</b>, and many other Qt classes." ) );
 }
 
 void MainWindow::updateCellIndicators()

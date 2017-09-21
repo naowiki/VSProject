@@ -9,8 +9,11 @@
 
 #include <QDialog>
 #include <QLabel>
+#include <QTableWidgetSelectionRange>
 
 #include "ui_spreadsheet.h"
+
+class SpreadsheetCompare;
 
 class Spreadsheet : public QDialog, public Ui::Spreadsheet
 {
@@ -24,12 +27,25 @@ public:
     QString currentFormula();
     bool readFile( QString );
     bool writeFile( QString );
+	void setCurrentCell( int, int );
+	QTableWidgetSelectionRange selectedRange() const;
+    void sort( const SpreadsheetCompare &compare );
 
 public slots:
     void newFile();
+
 
 private:
     bool IsChecked;
 };
 
+class SpreadsheetCompare
+{
+public:
+    bool operator() ( const QStringList &row1,
+                      const QStringList &row2 ) const;
+    enum { KeyCount = 3 };
+    int keys[ KeyCount ];
+    bool ascending[ KeyCount ];
+};
 #endif // SPREADSHEET_H
