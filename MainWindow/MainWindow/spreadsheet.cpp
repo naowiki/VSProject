@@ -1,6 +1,7 @@
 #include <QtGui>
 #include <QList>
 
+//#include "cell.h"
 #include "spreadsheet.h"
 
 //==============================================================================================================================================================
@@ -15,10 +16,22 @@
 */
 //==============================================================================================================================================================
 Spreadsheet::Spreadsheet(QWidget *parent)
-    : QDialog(parent),
+    : QTableWidget(parent),\
       IsChecked(false)
 {
     setupUi(this);
+
+    autoRecalc = true;
+
+    setSelectionMode( ContiguousSelection );
+
+    connect( this, SIGNAL( itemChanged( QTableWidgetItem * ) ),
+             this, SLOT( somethingChanged() ) );
+
+    setRowCount( 1000 );
+    setColumnCount( 6 );
+
+    //clear();
 }
 //==============================================================================================================================================================
 /**
@@ -52,7 +65,8 @@ QString Spreadsheet::currentFormula()
 
 void Spreadsheet::clear()
 {
-
+    setRowCount( 0 );
+    setColumnCount( 0 );
 }
 
 bool Spreadsheet::readFile( QString fileName )
@@ -83,3 +97,13 @@ void Spreadsheet::sort( const SpreadsheetCompare &compare )
 {
 
 }
+
+void Spreadsheet::somethingChanged()
+{
+
+}
+
+//Cell *Spreadsheet::cell( int row, int column ) const
+//{
+//    return static_cast<Cell *> (item( row, column ) );
+//}

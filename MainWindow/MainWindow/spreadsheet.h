@@ -9,13 +9,16 @@
 
 #include <QDialog>
 #include <QLabel>
+#include <QTableWidget>
+
 #include <QTableWidgetSelectionRange>
 
 #include "ui_spreadsheet.h"
 
 class SpreadsheetCompare;
+//class Cell;
 
-class Spreadsheet : public QDialog, public Ui::Spreadsheet
+class Spreadsheet : public QTableWidget, public Ui::Spreadsheet
 {
     Q_OBJECT
 
@@ -34,9 +37,13 @@ public:
 public slots:
     void newFile();
 
+private slots:
+    void somethingChanged();
 
 private:
     bool IsChecked;
+    bool autoRecalc;
+    //Cell *cell( int row, int column ) const;
 };
 
 class SpreadsheetCompare
